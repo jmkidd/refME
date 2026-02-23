@@ -119,4 +119,35 @@ def revcomp(seq):
     c = ''.join(seq)
     return c
 ##############################################################################
-
+def parse_rmask_line(line):
+# line should be list of RepeatMasker .out (after .split() )
+# returns diction of various info
+    d = {}
+    d['chrom'] = line[4]
+    d['rStart'] = int(line[5])
+    d['rEnd'] = int(line[6])
+    d['rType'] = line[9]
+    d['rFam'] = line[10]
+    d['rID'] = line[14]
+    d['ori'] = line[8]
+    d['dvg'] = float(line[1])
+    if d['ori'] == '+':
+        elemStart = int(line[11])
+        elemEnd = int(line[12])
+        elemLeft = line[13]
+        elemLeft = elemLeft.replace('(','')
+        elemLeft = elemLeft.replace(')','')            
+        elemLeft = int(elemLeft)
+    elif d['ori'] == 'C':
+        elemStart = int(line[13])
+        elemEnd = int(line[12])
+        elemLeft = line[11]
+        elemLeft = elemLeft.replace('(','')
+        elemLeft = elemLeft.replace(')','')            
+        elemLeft = int(elemLeft)        
+    
+    d['elemStart'] = elemStart
+    d['elemEnd'] = elemEnd
+    d['elemLeft'] = elemLeft    
+    return d
+##############################################################################
