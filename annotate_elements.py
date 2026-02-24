@@ -11,13 +11,14 @@ parser = argparse.ArgumentParser(description='annotate alignments for TSD and po
 parser.add_argument('--fasta', type=str,help='genome fata file',required=True)
 parser.add_argument('--intable', type=str,help='input file of segments',required=True)
 parser.add_argument('--outtable', type=str,help='output file for segments with annotation',required=True)
+parser.add_argument('--three_delta', type=int,help='three prime end delta search (100 or 3000)',required=True)
 args = parser.parse_args()
 
 
 
 
 #####################################################################
-def search_tsd_polyA(d,chromSeq):
+def search_tsd_polyA(d,chromSeq,three_delta):
     aligner = Align.PairwiseAligner()
     aligner.mode = "local"
     aligner.match = 1
@@ -30,7 +31,6 @@ def search_tsd_polyA(d,chromSeq):
     five_delta = 100
     five_internal = 50
     three_internal = 50
-    three_delta = 3000
     
     if d['ori'] == '+':
         fiveStart = d['rStart'] - five_delta
@@ -289,6 +289,7 @@ def score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_sta
 #####################################################################
 print('input table:',args.intable)
 print('output table:',args.outtable)
+print('three_delta:',args.three_delta)
 
 # read in sequences
 
@@ -348,7 +349,7 @@ for line in inFile:
     
     chromSeq = genomeSeqs[d['chrom']]['seq']
     
-    res = search_tsd_polyA(d,chromSeq)
+    res = search_tsd_polyA(d,chromSeq,args.three_delta)
     
     
     nl = []
