@@ -50,9 +50,6 @@ def search_tsd_polyA(d,chromSeq):
         print('orient error?')
         print(d)
         sys.exit()
-        
-        
-    print(fiveStart,fiveEnd,threeStart,threeEnd)
     
     if fiveStart < 1:
         fiveStart = 1
@@ -70,13 +67,8 @@ def search_tsd_polyA(d,chromSeq):
     
     alignments = aligner.align(fiveSeq, threeSeq)
 
-    print('num alignments',len(alignments))
-
     annotCandidates = []
     for a_i, alignment in enumerate(alignments):
-        print(a_i)
-        print(alignment)
-        
         
         aln_five = alignment[0]
         aln_three = alignment[1]
@@ -85,10 +77,10 @@ def search_tsd_polyA(d,chromSeq):
         aln_three_coord = alignment.coordinates[1]        
 
         aln_five_start = aln_five_coord[0] + 1
-        aln_five_end = aln_five_coord[1]
+        aln_five_end = aln_five_coord[-1]
         
         aln_three_start = aln_three_coord[0] + 1
-        aln_three_end = aln_three_coord[1]
+        aln_three_end = aln_three_coord[-1]
         
         
         aln_five_start = aln_five_start + fiveStart - 1
@@ -98,18 +90,10 @@ def search_tsd_polyA(d,chromSeq):
         aln_three_start = aln_three_start + threeStart - 1
         aln_three_end = aln_three_end + threeStart - 1
         
-        
-        
-        
-        
-        
-        print(aln_five,aln_three)
-        print(aln_five_coord,aln_three_coord)
-        print(aln_five_start,aln_five_end,aln_three_start,aln_three_end)
+                
         candidate = score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_start,aln_three_end,d,chromSeq)
         annotCandidates.append(candidate)
                 
-    print('there are ',len(annotCandidates))
     maxScore = -1 
     for i in range(len(annotCandidates)):
         if annotCandidates[i]['TSDscore'] > maxScore:
@@ -128,6 +112,7 @@ def search_tsd_polyA(d,chromSeq):
         res['tsd_dist_5'] = '.'
         res['tsd_dist_3'] = '.'
         res['passWinPolyA'] = 'NO'
+        res['cutSite'] = '.'        
         return res
     
     canAligns = []
@@ -135,7 +120,6 @@ def search_tsd_polyA(d,chromSeq):
         if annotCandidates[i]['TSDscore'] == maxScore:
             canAligns.append(annotCandidates[i])
     
-    print('max score is',maxScore,'num with max is',len(canAligns))
     # see how many
     if len(canAligns) == 1:
         return canAligns[0]
@@ -146,7 +130,6 @@ def search_tsd_polyA(d,chromSeq):
         if annotCandidates[i]['TSDscore'] == maxScore and annotCandidates[i]['passWinPolyA'] == 'YES':
             canAligns.append(annotCandidates[i])
     
-    print('num with passPolyA is',len(canAligns))
     
     if len(canAligns) == 1:
         return canAligns[0]
@@ -155,7 +138,6 @@ def search_tsd_polyA(d,chromSeq):
         for i in range(len(annotCandidates)): 
             if annotCandidates[i]['TSDscore'] == maxScore:
                 canAligns.append(annotCandidates[i])
-    print('pick based on dist',len(canAligns))
 
     #will now take ones with min dist, or just first one
     minDist = 9999999999
@@ -163,7 +145,6 @@ def search_tsd_polyA(d,chromSeq):
         dist = canAligns[i]['tsd_dist_5'] + canAligns[i]['tsd_dist_3']
         if dist < minDist:
             minDist = dist
-    print('mindist is',minDist)
     # return the min
     for i in range(len(canAligns)): 
         dist = canAligns[i]['tsd_dist_5'] + canAligns[i]['tsd_dist_3']
@@ -171,7 +152,6 @@ def search_tsd_polyA(d,chromSeq):
             return(canAligns[i])    
 #####################################################################
 def score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_start,aln_three_end,d,chromSeq):
-    print('in score!!')
     
     myCan = {} # store candidate data
     myCan['aln_five'] = aln_five
@@ -199,17 +179,11 @@ def score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_sta
     myCan['numMissMatch'] = numMissMatch
     
     
-    print(fiveLen,threeLen)
-    print('matches',numMatch,numMissMatch)
-    
     if '-' in myCan['aln_five'] or '-' in myCan['aln_three']:
-        print('true gap!')
         myCan['hasGap'] = 'YES'
     else:
-        print('no gap')
         myCan['hasGap'] = 'NO'
-    
-    
+        
     # do some scoring
     if myCan['tsdLen'] < 9:
         myCan['TSDscore'] = 0
@@ -230,7 +204,6 @@ def score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_sta
         elemStart = d['rEnd']
         TSDedge = myCan['aln_five_start']
         tsdDist = TSDedge - elemStart
-    print('5tsd dist',tsdDist)
     myCan['tsd_dist_5'] = tsdDist
     
     if tsdDist <= 10:
@@ -247,7 +220,6 @@ def score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_sta
         elemStart = d['rStart']
         TSDedge = myCan['aln_three_end']
         tsdDist = elemStart - TSDedge
-    print(TSDedge,'3tsd dist',tsdDist)
     myCan['tsd_dist_3'] = tsdDist
     
     
@@ -268,9 +240,8 @@ def score_candidate(aln_five,aln_three,aln_five_start,aln_five_end,aln_three_sta
         HSP_qual_score = 0
         
     myCan['TSDscore'] = HSP_position_score_5 + HSP_position_score_3 + HSP_qual_score
-    print('SCORE:',myCan['TSDscore'],HSP_position_score_5,HSP_position_score_3,HSP_qual_score)
+#    print('SCORE:',myCan['TSDscore'],HSP_position_score_5,HSP_position_score_3,HSP_qual_score)
     
-    print('SEARCH poly(A)!')
     # min 10, at least 73% A...
     # matt took 30bp window, required it to have at least 1 window with 10/15 A
     myCan['passWinPolyA'] = 'NO'
@@ -368,20 +339,19 @@ for line in inFile:
         
         continue
     # not header
-    print(line)
     d = {}
     for n in colToNames:
         v = line[colToNames[n]]
         if n in ['rStart','rEnd','elemStart','elemEnd']:
             v = int(v)
         d[n] = v
-    print(d)
+    
+    if d['locusID'] != 'LINE_6982':
+        continue
     
     chromSeq = genomeSeqs[d['chrom']]['seq']
     
     res = search_tsd_polyA(d,chromSeq)
-    print('my result is!!!')
-    print(res)
     
     
     nl = []
@@ -393,9 +363,12 @@ for line in inFile:
     nl.append(res['TSDscore'])    
     nl.append(res['passWinPolyA'])
     
-    
-    fiveTSDCoords = '%i-%i' % (res['aln_five_start'],res['aln_five_end'])
-    threeTSDCoords = '%i-%i' % (res['aln_three_start'],res['aln_three_end'])
+    if res['tsdLen'] == 0:
+        fiveTSDCoords = '.'
+        threeTSDCoords = '.'
+    else:
+        fiveTSDCoords = '%i-%i' % (res['aln_five_start'],res['aln_five_end'])
+        threeTSDCoords = '%i-%i' % (res['aln_three_start'],res['aln_three_end'])
     
     
     nl.append(fiveTSDCoords)
@@ -423,9 +396,10 @@ for line in inFile:
     outFile.write(nl)
     
     numLoci += 1
-    if numLoci >= 100:
-        break
-        
+#    if numLoci >= 4000:
+#        break
+    if numLoci % 500 == 0:
+        print(numLoci,nl.rstrip())    
     
     
 
