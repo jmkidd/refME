@@ -346,9 +346,6 @@ for line in inFile:
             v = int(v)
         d[n] = v
     
-    if d['locusID'] != 'LINE_6982':
-        continue
-    
     chromSeq = genomeSeqs[d['chrom']]['seq']
     
     res = search_tsd_polyA(d,chromSeq)
