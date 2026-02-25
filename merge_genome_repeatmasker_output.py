@@ -33,9 +33,6 @@ for line in inFile:
         continue
     d = refMEUtils.parse_rmask_line(line)
     
-    if d['chrom'] != 'chr1':
-        break
-    
     allLines.append(d)
 inFile.close()
 print('Read in all RepeatMasker lines, num lines = ',len(allLines))
