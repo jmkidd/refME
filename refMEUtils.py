@@ -151,3 +151,40 @@ def parse_rmask_line(line):
     d['elemLeft'] = elemLeft    
     return d
 ##############################################################################
+#returns lists of [int,flag]
+def expand_cigar(cigar):
+    res = []
+    if cigar == '*':
+        return res
+    digits = ['0','1','2','3','4','5','6','7','8','9']
+    accumulate = ''
+    i = 0
+    while True:
+        if i == len(cigar):
+            break
+        if cigar[i] in digits:
+            accumulate += cigar[i]
+            i += 1
+        else:
+            d = int(accumulate)
+            res.append([d,cigar[i]])
+            i += 1
+            accumulate = ''
+    return res
+#####################################################################
+def parse_paf_line(line):
+    pafLine = {}
+    pafLine['qName'] = line[0]
+    pafLine['qLen'] = int(line[1])
+    pafLine['qStart'] = int(line[2])
+    pafLine['qEnd'] = int(line[3])
+    pafLine['strand'] = line[4]
+    pafLine['tName'] = line[5]
+    pafLine['tLen'] = int(line[6])
+    pafLine['tStart'] = int(line[7])
+    pafLine['tEnd'] = int(line[8])
+    pafLine['numMatch'] = int(line[9])
+    pafLine['alignBlockLen'] = int(line[10])
+    pafLine['mapQ'] = int(line[11])
+    return pafLine
+##############################################################################
