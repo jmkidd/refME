@@ -206,6 +206,11 @@ for line in inFile:
     nl.append(res['alleleType'])
     nl.append(res['decision'])
     nl.append(paf['mapQ'])
+    
+    hitPos = paf['tName'] + ':' + str(paf['tStart'])
+    nl.append(hitPos)
+    
+    
     nl = [str(j) for j in nl]
     nl = '\t'.join(nl) + '\n'
     outFile.write(nl)
