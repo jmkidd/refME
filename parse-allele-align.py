@@ -211,8 +211,6 @@ for line in inFile:
     outFile.write(nl)
     
     numDid += 1
-    if numDid > 500:    
-        break
 
 
 
