@@ -72,14 +72,44 @@ for line in inFile:
         res = res.split(',')
         if res[0] == '5prime_PRESENT':
             counts[lid]['filled5'] += 1
-        if res[1] == '5prime_PRESENT':
-            counts[lid]['3prime_PRESENT'] += 1
+        if res[1] == '3prime_PRESENT':
+            counts[lid]['filled3'] += 1
 inFile.close()
 
 print('tabulated all, writing output!')
 outFile = open(args.tabulattable,'w')
 for lid in alleleTable:
     nl = [lid,counts[lid]['empty'],counts[lid]['filled5'],counts[lid]['filled3']]
+    
+    dec = '?'
+    sumFilled = counts[lid]['filled5'] + counts[lid]['filled3']
+    if counts[lid]['empty'] > 0 and sumFilled > 0:
+        dec = 'obs_both'
+    elif counts[lid]['empty'] == 0 and sumFilled == 0:
+        dec = 'obs_neither'
+    elif counts[lid]['empty'] > 1 and sumFilled == 0:
+        dec = 'mult_empty'
+    elif counts[lid]['empty'] == 1 and sumFilled == 0:
+        dec = 'EMPTY'
+    elif counts[lid]['filled5'] > 1 and counts[lid]['empty'] == 0:
+        dec = 'mult_filled'
+    elif counts[lid]['filled3'] > 1 and counts[lid]['empty'] == 0:
+        dec = 'mult_filled'
+    elif counts[lid]['filled5'] == 1 and counts[lid]['filled3'] == 0 and counts[lid]['empty'] == 0:
+        dec = 'FILLED_5'
+    elif counts[lid]['filled3'] == 1 and counts[lid]['filled5'] == 0 and counts[lid]['empty'] == 0:
+        dec = 'FILLED_3'
+    elif counts[lid]['filled5'] == 1 and counts[lid]['filled3'] == 1 and counts[lid]['empty'] == 0:
+        dec = 'FILLED_both'
+    else:
+        print(nl)
+        print('what??')
+        sys.exit()
+
+    nl.append(dec)     
+
+    
+    
     nl = [str(j) for j in nl]
     nl = '\t'.join(nl) + '\n'
     outFile.write(nl)
